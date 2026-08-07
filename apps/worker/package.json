@@ -1,0 +1,20 @@
+{
+  "name": "@digest-deck/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "wrangler dev src/index.ts --local --port 8787",
+    "deploy": "wrangler deploy",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@digest-deck/shared": "0.1.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250807.0"
+  }
+}

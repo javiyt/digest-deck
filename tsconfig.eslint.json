@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "types": ["node", "vitest/globals", "@testing-library/jest-dom", "@cloudflare/workers-types"]
+  },
+  "include": [
+    "eslint.config.js",
+    "vitest.config.ts",
+    "apps/**/*.ts",
+    "apps/**/*.tsx",
+    "apps/**/*.js",
+    "packages/**/*.ts"
+  ]
+}
