@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { extractResponseSchema } from "@digest-deck/shared";
 import worker from "../src/index";
 
 describe("worker handler", () => {
@@ -17,7 +18,8 @@ describe("worker handler", () => {
       body: JSON.stringify({ urls: ["https://example.com/a"] })
     });
     const response = await worker.fetch(request, { ALLOWED_ORIGIN: "https://user.github.io" });
-    const body = (await response.json()) as { articles: Array<{ title: string }>; errors: unknown[] };
+    const rawBody: unknown = await response.json();
+    const body = extractResponseSchema.parse(rawBody);
     expect(response.headers.get("Access-Control-Allow-Origin")).toBe("http://localhost:5173");
     expect(body.articles[0]?.title).toBe("Remote title");
     expect(body.errors).toHaveLength(0);
