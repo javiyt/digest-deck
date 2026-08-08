@@ -102,6 +102,41 @@ The deploy workflow uses:
 command: deploy --var ALLOWED_ORIGIN:${{ vars.WORKER_ALLOWED_ORIGIN }}
 ```
 
+### Configure the Worker in Cloudflare
+
+1. In Cloudflare, select the account that will own the Worker.
+2. Go to Workers & Pages.
+3. Create a Worker named `digest-deck-extractor`, or let Wrangler create it on the first deploy.
+4. Copy the account ID from the Cloudflare dashboard. Use this as the GitHub Actions secret `CLOUDFLARE_ACCOUNT_ID`.
+5. Create an API token for GitHub Actions:
+   - Go to My Profile → API Tokens → Create Token.
+   - Use a custom token.
+   - Account permissions: `Workers Scripts:Edit` / `Workers Scripts Write`.
+   - Account resources: include the account from step 1.
+   - Do not use the global API key.
+6. Copy the token value immediately and add it as the GitHub Actions secret `CLOUDFLARE_API_TOKEN`.
+7. In GitHub, go to Settings → Secrets and variables → Actions.
+8. Add repository secrets:
+   - `CLOUDFLARE_ACCOUNT_ID`
+   - `CLOUDFLARE_API_TOKEN`
+9. Add repository variables:
+   - `WORKER_ALLOWED_ORIGIN=https://<user>.github.io` for GitHub Pages, or `https://javi.yt` for the custom domain.
+   - `VITE_EXTRACTOR_API_URL=https://digest-deck-extractor.<workers-subdomain>.workers.dev/api/extract`
+10. Run the `Deploy` workflow from GitHub Actions, or push to `main`.
+11. After deploy, test the Worker endpoint:
+
+```bash
+curl -i https://digest-deck-extractor.<workers-subdomain>.workers.dev/api/extract
+```
+
+Expected result for `GET` is `405 Method Not Allowed`. That confirms the Worker is reachable; the app uses `POST /api/extract`.
+
+Common deploy errors:
+
+- `Invalid access token [code: 9109]`: rotate `CLOUDFLARE_API_TOKEN`; the token value is invalid, expired, or copied incorrectly.
+- `Authentication error [code: 10000]`: check that the token belongs to the same account as `CLOUDFLARE_ACCOUNT_ID` and has `Workers Scripts:Edit` / `Workers Scripts Write`.
+- CORS errors in the browser: set `WORKER_ALLOWED_ORIGIN` to the exact frontend origin, without a trailing slash.
+
 ## GitHub Pages
 
 The app supports `/digest-deck/` through `VITE_BASE_PATH`.
@@ -113,6 +148,24 @@ In GitHub:
 3. Configure the repository variable `VITE_EXTRACTOR_API_URL`, for example:
    `https://digest-deck-extractor.<subdomain>.workers.dev/api/extract`.
 4. Keep `VITE_BASE_PATH=/digest-deck/` unless you change the repository name or use a custom domain.
+
+## Cloudflare Pages
+
+The frontend can also be deployed as a Cloudflare Pages project from the monorepo.
+
+In Cloudflare Pages, set:
+
+- Root directory: repository root
+- Build command: `npm run build`
+- Build output directory: `apps/web/dist`
+- Deploy command: `npx wrangler pages deploy apps/web/dist --project-name digest-deck`
+
+Do not use `npx wrangler deploy` for the frontend. That command deploys Workers and will fail when Wrangler tries to detect an application from the monorepo root.
+
+For a custom domain such as `https://javi.yt`, set:
+
+- `VITE_BASE_PATH=/`
+- `VITE_EXTRACTOR_API_URL=https://digest-deck-extractor.<subdomain>.workers.dev/api/extract`
 
 ## CI/CD
 
@@ -150,6 +203,7 @@ Required repository variables:
 - `VITE_EXTRACTOR_API_URL`: public Worker endpoint URL, for example `https://digest-deck-extractor.<subdomain>.workers.dev/api/extract`.
 
 The Cloudflare token should have the minimum permissions required to edit Workers Scripts in the target account.
+If Wrangler reports `Invalid access token [code: 9109]`, rotate `CLOUDFLARE_API_TOKEN`; that error means the token value itself is invalid or expired. The token used by GitHub Actions must be scoped to the account in `CLOUDFLARE_ACCOUNT_ID` and allow Workers script writes.
 
 ## First Deployment
 
