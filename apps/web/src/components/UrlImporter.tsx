@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type JSX } from "react";
 import { parseUrlLines, type UrlProcessStatus } from "@digest-deck/shared";
 import { Link, Loader2 } from "lucide-react";
 

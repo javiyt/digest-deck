@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import { renderNewsletterEmail, type Newsletter } from "@digest-deck/shared";
 import { Copy, Mail } from "lucide-react";
 import { copyRichNewsletter, copyText } from "../lib/clipboard";

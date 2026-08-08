@@ -1,3 +1,4 @@
+import type { HTMLAttributes, JSX } from "react";
 import type { NewsletterArticle } from "@digest-deck/shared";
 import { clearBrokenImage } from "../lib/image";
 import { ArrowDown, ArrowUp, GripVertical, RotateCcw, Trash2, X } from "lucide-react";
@@ -6,7 +7,7 @@ interface Props {
   article: NewsletterArticle;
   index: number;
   total: number;
-  dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>;
+  dragHandleProps?: HTMLAttributes<HTMLButtonElement>;
   onChange: (article: NewsletterArticle) => void;
   onDelete: () => void;
   onRestore: () => void;

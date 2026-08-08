@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import type { Newsletter } from "@digest-deck/shared";
 import { CopyPlus, Eye, Trash2 } from "lucide-react";
 
