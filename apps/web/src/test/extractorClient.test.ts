@@ -39,4 +39,37 @@ describe("extractUrls", () => {
     const result = await extractUrls(["https://example.com/a"], new Set());
     expect(result.errors[0]).toMatchObject({ requestedUrl: "https://example.com/a", code: "worker_error" });
   });
+
+  it("handles thrown non-error values and deduplicates returned canonical URLs", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockRejectedValueOnce("offline")
+        .mockResolvedValueOnce(new Response(
+          JSON.stringify({
+            articles: [
+              {
+                requestedUrl: "https://example.com/b",
+                canonicalUrl: "https://example.com/existing?utm_medium=email",
+                normalizedUrl: "https://example.com/existing",
+                title: "Duplicate"
+              }
+            ],
+            errors: []
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        ))
+    );
+
+    const result = await extractUrls(["https://example.com/a", "https://example.com/b"], new Set(["https://example.com/existing"]));
+
+    expect(result.articles).toHaveLength(0);
+    expect(result.duplicates).toEqual(["https://example.com/b"]);
+    expect(result.errors[0]).toMatchObject({
+      requestedUrl: "https://example.com/a",
+      code: "worker_error",
+      message: "Error del Worker."
+    });
+  });
 });
