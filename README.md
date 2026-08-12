@@ -162,6 +162,13 @@ In Cloudflare Pages, set:
 
 Do not use `npx wrangler deploy` for the frontend. That command deploys Workers and will fail when Wrangler tries to detect an application from the monorepo root.
 
+For a Cloudflare Worker build configured directly in the Cloudflare dashboard, keep the root directory as the repository root and use:
+
+- Build command: `npm run build`
+- Deploy command: `npx wrangler deploy --var ALLOWED_ORIGIN:<frontend-origin>`
+
+The repository includes a root `wrangler.jsonc` so this root-level deploy command targets `apps/worker/src/index.ts`.
+
 For a custom domain such as `https://javi.yt`, set:
 
 - `VITE_BASE_PATH=/`
