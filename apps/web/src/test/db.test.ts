@@ -42,6 +42,17 @@ describe("DigestDeckDatabase repositories", () => {
     database.close();
   });
 
+  it("replaces an empty draft without archiving it", async () => {
+    const database = new DigestDeckDatabase("test-empty-new");
+    const current = await getActiveNewsletter(database);
+    const fresh = await createNewNewsletter(current, database);
+    const archived = await listArchivedNewsletters(database);
+    expect(fresh.id).not.toBe(current.id);
+    expect(await database.newsletters.get(current.id)).toBeUndefined();
+    expect(archived).toHaveLength(0);
+    database.close();
+  });
+
   it("opens and duplicates archived newsletters", async () => {
     const database = new DigestDeckDatabase("test-history");
     const current = await saveNewsletter({ ...(await getActiveNewsletter(database)), subject: "Archive me" }, database);
@@ -55,6 +66,13 @@ describe("DigestDeckDatabase repositories", () => {
     expect(duplicate.id).not.toBe(source?.id);
     expect(duplicate.isActive).toBe(true);
     expect(freshArchive.isActive).toBe(true);
+    database.close();
+  });
+
+  it("rejects unknown newsletter IDs", async () => {
+    const database = new DigestDeckDatabase("test-missing");
+    await expect(openNewsletterAsActive("missing", database)).rejects.toThrow("Newsletter no encontrada.");
+    await expect(duplicateNewsletter("missing", database)).rejects.toThrow("Newsletter no encontrada.");
     database.close();
   });
 });
