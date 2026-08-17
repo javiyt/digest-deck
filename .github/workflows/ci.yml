@@ -34,3 +34,65 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  github-pages-preview:
+    name: GitHub Pages preview
+    needs: quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v6
+
+      - name: Install
+        run: npm ci
+
+      - name: Build frontend for GitHub Pages
+        env:
+          VITE_EXTRACTOR_API_URL: ${{ vars.VITE_EXTRACTOR_API_URL }}
+          VITE_BASE_PATH: /digest-deck/
+        run: npm --workspace @digest-deck/shared run build && npm --workspace @digest-deck/web run build
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: apps/web/dist
+
+      - name: Register preview deployment
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.payload.pull_request.head.sha,
+              task: "deploy",
+              auto_merge: false,
+              required_contexts: [],
+              environment: "github-pages-preview",
+              description: "GitHub Pages artifact built for this pull request",
+              transient_environment: true,
+              production_environment: false,
+            });
+
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deployment.data.id,
+              state: "success",
+              log_url: runUrl,
+              description: "GitHub Pages preview artifact is ready",
+            });

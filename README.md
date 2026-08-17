@@ -182,7 +182,8 @@ Pull requests run:
 - lint;
 - typecheck;
 - tests with coverage;
-- build.
+- build;
+- GitHub Pages preview deployment registration, after building and uploading the Pages artifact with the same frontend configuration as production.
 
 Pushes to `main` run:
 
