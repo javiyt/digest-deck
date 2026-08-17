@@ -183,7 +183,7 @@ Pull requests run:
 - typecheck;
 - tests with coverage;
 - build;
-- GitHub Pages artifact build, using the same frontend configuration as the Pages deploy.
+- GitHub Pages preview deployment registration, after building and uploading the Pages artifact with the same frontend configuration as production.
 
 Pushes to `main` run:
 
