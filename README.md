@@ -182,7 +182,8 @@ Pull requests run:
 - lint;
 - typecheck;
 - tests with coverage;
-- build.
+- build;
+- GitHub Pages artifact build, using the same frontend configuration as the Pages deploy.
 
 Pushes to `main` run:
 
